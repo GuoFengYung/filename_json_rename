@@ -12,9 +12,10 @@ from pathlib import Path
 from shutil import copyfile
 from typing import List, Optional, Tuple
 from tqdm import tqdm
-import csv
+from tqdm import tqdm
 import lxml.builder
 import lxml.etree
+
 
 @dataclass
 class Annotation:
@@ -127,16 +128,33 @@ def write_dst_annotation(annotation: Annotation, path_to_annotation_xml: str):
     tree.write(path_to_annotation_xml, pretty_print=True)
 
 
-def rename(path_to_jpg: str):
-    path_to_src_jpg = sorted([path.as_posix() for path in Path(path_to_jpg).rglob(f'*.json')])
-    n = 1
-    for jpg in path_to_src_jpg:
-        old_path = os.path.join(jpg)
-        # print(old_path)
-        old_name = old_path.split('/')[-1]
-        os.rename(old_path, f'./new/0728_{old_name:s}')
-        print(f'0728_{old_name:s}')
-        n = n + 1
+def rename(path_to_jpg: str, path_to_output: str, num: str):
+
+    os.makedirs(path_to_output, exist_ok=True)
+
+    path_to_src_jpg = sorted([path.as_posix() for path in Path(path_to_jpg).rglob(f'*.jpg')])
+    path_to_src_json = sorted([path.as_posix() for path in Path(path_to_jpg).rglob(f'*.txt')])
+    print(f"Find {len(path_to_src_json)} Json files")
+    print(f"Find {len(path_to_src_jpg)} Jpg files")
+
+    # n = 0
+    for jpg_files in tqdm(path_to_src_jpg):
+        print(jpg_files)
+    #     # print(jpg_files)
+    #     old_name = os.path.join(jpg_files).split('/')[-1]
+    #     split_dir = os.path.join(jpg_files).split('/')[0]
+    #     cur_path = os.getcwd() + os.path.sep + split_dir + os.path.sep + "images" +os.path.sep + old_name
+    #     n += 1
+    #     shutil.copyfile(cur_path, f'{path_to_output:s}/{num:s}_{n:d}.jpg')
+
+    # i = 0
+    for json_files in tqdm(path_to_src_json):
+        print(json_files)
+    #     old_name = os.path.join(json_files).split('/')[-1]
+    #     split_dir = os.path.join(json_files).split('/')[0]
+    #     cur_path = os.getcwd() + os.path.sep + split_dir  + os.path.sep + "labels" + os.path.sep + old_name
+    #     i += 1
+    #     shutil.copyfile(cur_path, f'{path_to_output:s}/{num:s}_{i:d}.txt')
 
 
 def convert(path_to_src_dir: str):
@@ -178,12 +196,14 @@ if __name__ == '__main__':
         parser = argparse.ArgumentParser()
         parser.add_argument('-s', '--src_dir', type=str, required=True, help='path to source directory')
         parser.add_argument('-o', '--drc_dir', type=str, required=True, help='path to  directory')
+        parser.add_argument('-n', '--name', type=str, required=True, help='new name')
         args = parser.parse_args()
         path_to_src_dir = args.src_dir
         path_to_drc_dir = args.drc_dir
+        name = args.name
         # convert(path_to_src_dir)
         # remove_jpg(path_to_src_dir, path_to_drc_dir)
-        # rename(path_to_jpg=path_to_src_dir)
+        rename(path_to_jpg=path_to_src_dir, path_to_output=path_to_drc_dir, num=name)
         # json_imagename_rename(path_to_src_dir, path_to_drc_dir)
     main()
 
